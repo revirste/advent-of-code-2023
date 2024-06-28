@@ -1,7 +1,8 @@
-// 6/27/2024
-// Figure out why CurrentRoundIsPossible() is behaving weird when it comes to detecting the ';' vs the ',' to determine
-// the current round draw.
-// WIP
+// 6/28/2024
+//
+// Dev diary: I give up
+// I am still a noob and i just cant figure this out quite yet. I may come back to it but not right now
+// Total time spent: 4 hours
 
 #include <iostream>
 #include <string>
@@ -10,17 +11,71 @@
 
 using namespace std;
 
+//ParseCurrentGame()
+//ParseCurrentRound()
+
+//IsRoundPossible()
+
+
 const int MAX_CUBES_RED = 12;
 const int MAX_CUBES_BLUE = 13;
 const int MAX_CUBES_GREEN = 14;
 
 int gameNumber = 0;
-bool currentGameStatus;
+bool currentRoundStatus = true;
+
+
+
+
+// is "red", "green" or "blue" in the current cube substr? If so, find how many cubes were drawn for that color
+string FindCubeDrawValue(string currentCubeDraw) {
+    
+    string cubeDrawValue;
+    if (currentCubeDraw.find("red") != string::npos) {
+        for (int i = 0; i < currentCubeDraw.length(); ++i) {
+            if (isdigit(currentCubeDraw.at(i))) {
+                //cubeDrawValue = currentCubeDraw.at(i);
+                if (int(currentCubeDraw.at(i)) > MAX_CUBES_RED) {
+                    currentRoundStatus = false;
+                    std::cout << "(DEBUG) MAX ALLOWED FOR RED IS " << MAX_CUBES_RED << std::endl;
+                    std::cout << "(DEBUG) A draw of " << currentCubeDraw.at(i) << " requires setting current round status to " << currentRoundStatus << std::endl;
+                }
+
+            }
+        }
+    }   
+    if (currentCubeDraw.find("green") != string::npos) {
+        for (int i = 0; i < currentCubeDraw.length(); ++i) {
+            if (isdigit(currentCubeDraw.at(i))) {
+                //cubeDrawValue = currentCubeDraw.at(i);
+                if (currentCubeDraw.at(i) > MAX_CUBES_GREEN) {
+                    currentRoundStatus = false;
+                    std::cout << "(DEBUG) MAX ALLOWED FOR GREEN IS " << MAX_CUBES_GREEN << std::endl;
+                    std::cout << "(DEBUG) A draw of " << currentCubeDraw.at(i) << " requires setting current round status to " << currentRoundStatus << std::endl;
+                }
+            }
+        }
+    }
+    if (currentCubeDraw.find("blue") != string::npos) {
+            for (int i = 0; i < currentCubeDraw.length(); ++i) {
+                if (isdigit(currentCubeDraw.at(i))) {
+                    //cubeDrawValue = currentCubeDraw.at(i);
+                    if (int(currentCubeDraw.at(i)) > MAX_CUBES_BLUE) {
+                        currentRoundStatus = false;
+                        std::cout << "(DEBUG) MAX ALLOWED FOR BLUE IS " << MAX_CUBES_BLUE << std::endl;
+                        std::cout << "(DEBUG) A draw of " << currentCubeDraw.at(i) << " requires setting current round status to " << currentRoundStatus << std::endl;
+                    }
+                }
+            }
+        }
+    return cubeDrawValue;
+}
+
 
 
 // pass in: "1 green, 6 red, 4 blue;"
 bool CurrentRoundIsPossible(string currentRound) {
-    bool IsGamePossible = true;
+    bool IsGamePossible;
     int firstDigitPos;
     int nextCommaPos;
     int nextSemicolonPos;
@@ -35,79 +90,50 @@ bool CurrentRoundIsPossible(string currentRound) {
         }
     }
 
-
-    for (int i = 0; i < numRoundsPlayed; ++i) {
-    
+// loop # of games played times + 1
+    for (int i = 0; i < numRoundsPlayed + 1; i++) {
         // find out where the first digit is and its relation to the next punctuation mark, putting that in a substr
-        if (isdigit(currentRound.at(i))) {
-            firstDigitPos = currentRound.find(currentRound.at(i));
-            
-            // find out the pos of the closest punctuation mark
-            nextCommaPos = currentRound.find(',');
-            nextSemicolonPos = currentRound.find (';');
-            if (nextCommaPos < nextSemicolonPos) {
-                nextPunctuationPos = nextCommaPos;
+        for (int i = 0; i < currentRound.size(); ++i) {
+            if (isdigit(currentRound.at(i))) {
+                firstDigitPos = currentRound.find(currentRound.at(i));
+                
+                // find out the pos of the closest punctuation mark
+                nextCommaPos = currentRound.find(',');
+                nextSemicolonPos = currentRound.find (';');
+                if (nextCommaPos < nextSemicolonPos) {
+                    nextPunctuationPos = nextCommaPos;
+                }
+                else {
+                    nextPunctuationPos = nextSemicolonPos;
+                }
+                // case where there is no semicolon (then semicolonPos will always be less than the nexcommaPos)
+                if (nextSemicolonPos = -1) {
+                    nextPunctuationPos = nextCommaPos;
+                }
+                // break out the current draw into its own substring so we can evaluate it
+                if (nextPunctuationPos != string::npos) {
+                    currentCubeDraw = currentRound.substr(0, nextPunctuationPos);
+                }
+                else {
+                    currentCubeDraw = currentRound.substr(0, string::npos);
+                }
             }
-            else {
-                nextPunctuationPos = nextSemicolonPos;
-            }
-
-            // break out the current draw into its own substring so we can evaluate it
-            if (nextPunctuationPos != string::npos) {
-                currentCubeDraw = currentRound.substr(0, nextPunctuationPos);
-            }
-            else {
-                currentCubeDraw = currentRound.substr(0, string::npos);
-            }
-
         }
 
         // debug print statements
         std::cout << "(DEBUG) CURRENT ROUND: " << currentRound << std::endl;
         std::cout << "(DEBUG) CURRENT CUBE DRAW: " << currentCubeDraw << std::endl;
-        std::cout << "(DEBUG) firstDigitPos: " << firstDigitPos << std::endl;
-        std::cout << "(DEBUG) nextCommaPos: " << nextCommaPos << std::endl;
-        std::cout << "(DEBUG) nextSemicolonPos: " << nextSemicolonPos << std::endl;
-        std::cout << "(DEBUG) nextPunctuationPos: " << nextPunctuationPos << std::endl;
-
-
+        std::cout << "(DEBUG) The cube draw value is: " << FindCubeDrawValue(currentCubeDraw) << std::endl;
+        //std::cout << "(DEBUG) Round validity: " << currentRoundStatus << std::endl;
+        //std::cout << "(DEBUG) firstDigitPos: " << firstDigitPos << std::endl;
+        //std::cout << "(DEBUG) nextCommaPos: " << nextCommaPos << std::endl;
+        //std::cout << "(DEBUG) nextSemicolonPos: " << nextSemicolonPos << std::endl;
+        //std::cout << "(DEBUG) nextPunctuationPos: " << nextPunctuationPos << std::endl;
+        std::cout << "#############################################" << std::endl;
 
         currentRound = currentRound.substr(nextPunctuationPos + 1, string::npos);
-
-        // is "red", "green" or "blue" in the current cube substr? If so, compare the number of items drawn to the threshold
-        if (currentCubeDraw.find("red") != string::npos) {
-            for (int i = 0; i < currentCubeDraw.length(); ++i) {
-                if (isdigit(currentCubeDraw.at(i))) {
-                    std::cout << "red has " << currentCubeDraw.at(i) << std::endl;
-                    if (currentCubeDraw.at(i) > MAX_CUBES_RED) {
-                        IsGamePossible = false;
-                    }
-                }
-            }
-        }
-        if (currentCubeDraw.find("green") != string::npos) {
-            for (int i = 0; i < currentCubeDraw.length(); ++i) {
-                if (isdigit(currentCubeDraw.at(i))) {
-                    std::cout << "green has " << currentCubeDraw.at(i) << std::endl;
-                    if (currentCubeDraw.at(i) > MAX_CUBES_GREEN) {
-                        IsGamePossible = false;
-                    }
-                }
-            }
-        }
-        if (currentCubeDraw.find("blue") != string::npos) {
-            for (int i = 0; i < currentCubeDraw.length(); ++i) {
-                if (isdigit(currentCubeDraw.at(i))) {
-                    std::cout << "blue has " << currentCubeDraw.at(i) << std::endl;
-                    if (currentCubeDraw.at(i) > MAX_CUBES_BLUE) {
-                        IsGamePossible = false;
-                    }
-                }
-            }
-        }
-        std::cout << "###################################################" << std::endl;
     }
-    
+   
     return IsGamePossible;
 }
 
@@ -122,7 +148,6 @@ void ParseCurrentGame(string inputGame) {
     inputGame = inputGame.substr(colonPos + 2, string::npos);
     std::cout << inputGame << std::endl;
 
-
     // find out how many rounds were played
     int numRoundsPlayed = 0;
     for (int i = 0; i < inputGame.size(); ++i) {
@@ -130,7 +155,6 @@ void ParseCurrentGame(string inputGame) {
             ++numRoundsPlayed;
         }
     }
-
 
    //for (int i = 0; i < numRoundsPlayed; ++i) {
         for (int i = 0; i < inputGame.size(); ++i) {
@@ -148,19 +172,14 @@ void ParseCurrentGame(string inputGame) {
                 }
                 
                 // Redeclare inputGame so that it trims off the substring that we just stored into tempSubStr, for further evaluation later
-                inputGame = inputGame.substr(nextSemicolonPos + 1, string::npos);;
+                inputGame = inputGame.substr(nextSemicolonPos + 1, string::npos);
 
-            
-                if (CurrentRoundIsPossible(tempSubStr)) {
-                   // std::cout << "This round is not possible! " << std::endl;
-                }
-                else {
-                  //  std::cout << "This round is possbile! " << std::endl;
-                }
+
+                CurrentRoundIsPossible(tempSubStr);
             }
         }
     }
-//}
+
 
 
 
